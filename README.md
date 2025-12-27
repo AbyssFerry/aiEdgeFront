@@ -1,5 +1,85 @@
-# Vue 3 + Vite
+# AiEdge 边缘AI模型管理平台 - 前端
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+一个基于 Vue 3 + Vite 的边缘AI模型管理平台前端应用，提供模型上传、下载、管理和AI对话功能。
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## ✨ 功能特性
+
+### 🤖 聊天界面
+- 流式AI对话，逐字显示回复
+- 支持多模型切换（所有下载的模型启动服务后自动激活）
+- 对话历史仅保存在内存中
+- 切换模型时自动清空对话
+- 服务未启动时显示引导界面
+
+### 📤 模型上传
+- 拖拽文件上传支持
+- 分片上传（100MB每块）
+- 断点续传功能
+- 实时上传进度和速度显示
+- 仅支持 .gguf 格式
+
+### 📥 模型下载
+- 从 Hugging Face 仓库下载模型
+- 实时下载进度监控
+- 下载历史记录
+- 支持后台下载
+
+### 🗄️ 模型管理
+- 查看所有本地模型
+- 模型搜索功能
+- 删除模型文件
+- 所有模型启动服务后自动激活
+
+### ⚙️ 服务控制
+- 启动/停止/重启推理服务
+- 服务启动后自动轮询直到可用
+- 实时系统资源监控（内存、GPU、硬盘）
+- 服务运行时长和状态显示
+
+## 🚀 快速开始
+
+### 环境要求
+- Node.js 16+
+- npm 或 yarn
+
+### 安装依赖
+```bash
+npm install
+```
+
+### 开发模式
+```bash
+npm run dev
+```
+访问 http://localhost:5173
+
+### 生产构建
+```bash
+npm run build
+```
+
+## 🎨 技术栈
+
+- **框架**: Vue 3 (Composition API)
+- **构建工具**: Vite
+- **路由**: Vue Router 4
+- **状态管理**: Pinia
+- **HTTP 客户端**: Axios
+- **样式**: Tailwind CSS
+- **图标**: Font Awesome 4.7
+- **日期处理**: Day.js
+
+## 📝 开发说明
+
+### 代理配置
+开发环境已配置代理：
+- `/api/management` → `http://localhost:23058`
+- `/api/inference` → `http://localhost:23059`
+
+### 重要特性
+1. **模型自动激活**: 所有下载的模型在服务启动后自动处于激活状态，无需手动激活
+2. **服务启动轮询**: 启动服务后会自动轮询检查服务状态直到可用（最多60秒）
+3. **断点续传**: 上传支持断点续传，可暂停和继续上传
+4. **流式对话**: AI对话使用流式输出，逐字显示回复内容
+5. **对话管理**: 切换模型时自动清空对话，对话仅保存在内存中
+

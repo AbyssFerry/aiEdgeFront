@@ -10,13 +10,24 @@
         rows="3"
       ></textarea>
       
+      <!-- 动态切换发送/停止按钮 -->
       <button
+        v-if="!isGenerating"
         @click="handleSend"
         :disabled="disabled || !inputText.trim()"
         class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
       >
         <i class="fa fa-paper-plane mr-2"></i>
         发送
+      </button>
+      
+      <button
+        v-else
+        @click="handleStop"
+        class="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center justify-center"
+      >
+        <i class="fa fa-stop mr-2"></i>
+        停止
       </button>
     </div>
   </div>
@@ -29,10 +40,14 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  isGenerating: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['send'])
+const emit = defineEmits(['send', 'stop'])
 
 const inputText = ref('')
 
@@ -41,6 +56,10 @@ const handleSend = () => {
   
   emit('send', inputText.value)
   inputText.value = ''
+}
+
+const handleStop = () => {
+  emit('stop')
 }
 </script>
 

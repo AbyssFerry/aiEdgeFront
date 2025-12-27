@@ -1,5 +1,5 @@
 <template>
-  <div class="message-list overflow-y-auto p-6 space-y-4" ref="messageContainer">
+  <div class="message-list h-full overflow-y-auto p-6 space-y-4" ref="messageContainer">
     <div
       v-for="(message, index) in messages"
       :key="index"
@@ -73,15 +73,23 @@ const formatContent = (content) => {
 const scrollToBottom = () => {
   nextTick(() => {
     if (messageContainer.value) {
+      const { scrollHeight, clientHeight, scrollTop } = messageContainer.value
+      console.log('[滚动调试]', { scrollHeight, clientHeight, scrollTop, canScroll: scrollHeight > clientHeight })
       messageContainer.value.scrollTop = messageContainer.value.scrollHeight
+      console.log('[滚动后] scrollTop:', messageContainer.value.scrollTop)
     }
   })
 }
 
-// 监听消息变化，自动滚动
+// 监听消息变化，自动滚动（作为兜底机制）
 watch(() => props.messages, () => {
   scrollToBottom()
 }, { deep: true, flush: 'post' })
+
+// 暴露方法给父组件
+defineExpose({
+  scrollToBottom
+})
 </script>
 
 <style scoped>

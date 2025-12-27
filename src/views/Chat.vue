@@ -1,9 +1,7 @@
 <template>
   <div class="chat-container h-full flex flex-col bg-white rounded-lg shadow">
-    <!-- 聊天界面 -->
-    <div class="flex-1 flex flex-col">
-      <!-- 顶部工具栏 -->
-      <div class="chat-header flex items-center justify-between px-6 py-4 border-b">
+    <!-- 顶部工具栏 -->
+    <div class="chat-header flex items-center justify-between px-6 py-4 border-b flex-shrink-0">
         <div class="flex items-center space-x-3">
           <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
             <i class="fa fa-comments text-white text-lg"></i>
@@ -35,20 +33,21 @@
             <i class="fa fa-trash-o mr-2"></i>清空
           </button>
         </div>
-      </div>
-
-      <!-- 消息列表 -->
-      <MessageList
-        :messages="messages"
-        class="flex-1"
-      />
-
-      <!-- 输入框 -->
-      <ChatInput
-        :disabled="isTyping"
-        @send="handleSendMessage"
-      />
     </div>
+
+    <!-- 消息列表 -->
+    <MessageList
+      ref="messageListRef"
+      :messages="messages"
+      class="flex-1 min-h-0"
+    />
+
+    <!-- 输入框 -->
+    <ChatInput
+      class="flex-shrink-0"
+      :disabled="isTyping"
+      @send="handleSendMessage"
+    />
   </div>
 </template>
 
@@ -58,6 +57,7 @@ import { getAvailableModels, chatCompletionStream, checkInferenceServiceAvailabl
 import MessageList from '@/components/MessageList.vue'
 import ChatInput from '@/components/ChatInput.vue'
 
+const messageListRef = ref(null)
 const availableModels = ref([])
 const selectedModel = ref('')
 const messages = ref([])
@@ -144,6 +144,8 @@ const handleSendMessage = async (content) => {
         messages.value[aiMessageIndex].content += chunk
         // 强制触发响应式更新
         messages.value = [...messages.value]
+        // 立即滚动到底部
+        messageListRef.value?.scrollToBottom()
       },
       (error) => {
         messages.value[aiMessageIndex].content = '抱歉，发生了错误：' + error.message

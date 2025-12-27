@@ -7,9 +7,10 @@
  * @param {Response} response - Fetch API响应对象
  * @param {Function} onChunk - 接收到文本块时的回调函数
  * @param {Function} onError - 发生错误时的回调函数
+ * @param {AbortSignal} signal - 中止信号
  * @returns {Promise<string>} 完整的响应文本
  */
-export async function parseStreamResponse(response, onChunk, onError) {
+export async function parseStreamResponse(response, onChunk, onError, signal = null) {
   const reader = response.body.getReader()
   const decoder = new TextDecoder('utf-8')
   let buffer = ''
@@ -17,6 +18,16 @@ export async function parseStreamResponse(response, onChunk, onError) {
 
   try {
     while (true) {
+      // 检查是否已中止
+      if (signal?.aborted) {
+        await reader.cancel()
+        fullContent += '\n\n[已停止]'
+        if (onChunk) {
+          onChunk('\n\n[已停止]')
+        }
+        break
+      }
+
       const { done, value } = await reader.read()
       
       if (done) break
@@ -55,6 +66,14 @@ export async function parseStreamResponse(response, onChunk, onError) {
       }
     }
   } catch (error) {
+    // 如果是中止错误，不作为异常处理
+    if (error.name === 'AbortError') {
+      fullContent += '\n\n[已停止]'
+      if (onChunk) {
+        onChunk('\n\n[已停止]')
+      }
+      return fullContent
+    }
     if (onError) {
       onError(error)
     }
@@ -69,9 +88,10 @@ export async function parseStreamResponse(response, onChunk, onError) {
  * @param {string} url - API端点URL
  * @param {Array} messages - 消息列表
  * @param {Object} options - 其他选项
+ * @param {AbortSignal} signal - 中止信号
  * @returns {Promise<Response>} Fetch响应对象
  */
-export async function createStreamRequest(url, messages, options = {}) {
+export async function createStreamRequest(url, messages, options = {}, signal = null) {
   const {
     model = null,
     temperature = 0.7,
@@ -97,7 +117,8 @@ export async function createStreamRequest(url, messages, options = {}) {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
+    signal: signal  // 添加中止信号
   })
 
   if (!response.ok) {

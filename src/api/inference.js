@@ -20,18 +20,22 @@ export function chatCompletion(messages, options = {}) {
 }
 
 // 流式对话
-export async function chatCompletionStream(messages, onChunk, onError, options = {}) {
+export async function chatCompletionStream(messages, onChunk, onError, options = {}, signal = null) {
   const url = '/api/inference/v1/chat/completions'
   
   try {
     const response = await createStreamRequest(url, messages, {
       stream: true,
       ...options
-    })
+    }, signal)
     
-    const fullContent = await parseStreamResponse(response, onChunk, onError)
+    const fullContent = await parseStreamResponse(response, onChunk, onError, signal)
     return fullContent
   } catch (error) {
+    // 如果是中止错误，不作为异常处理
+    if (error.name === 'AbortError') {
+      return
+    }
     if (onError) {
       onError(error)
     }

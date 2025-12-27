@@ -61,7 +61,10 @@
             <div class="text-2xl font-bold" :class="getStatusColor(currentTask.status)">
               {{ currentTask.percentage.toFixed(1) }}%
             </div>
-            <div class="text-sm text-gray-500">
+            <div 
+              v-if="currentTask.current_str && currentTask.total_str && currentTask.current_str !== '0B' && currentTask.total_str !== '0B'"
+              class="text-sm text-gray-500"
+            >
               {{ currentTask.current_str }} / {{ currentTask.total_str }}
             </div>
           </div>
@@ -146,7 +149,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { startModelDownload, getDownloadStatus } from '@/api/management'
 import { formatTime } from '@/utils/format'
 import Toast from '@/components/Toast.vue'
@@ -158,6 +161,19 @@ const downloadForm = ref({
 
 const currentTask = ref(null)
 const downloadHistory = ref([])
+
+// 从 localStorage 加载历史记录
+onMounted(() => {
+  try {
+    const saved = localStorage.getItem('downloadHistory')
+    if (saved) {
+      downloadHistory.value = JSON.parse(saved)
+    }
+  } catch (error) {
+    console.error('加载下载历史记录失败:', error)
+    downloadHistory.value = []
+  }
+})
 const toast = ref({ show: false, type: 'info', message: '' })
 let pollInterval = null
 
@@ -231,6 +247,18 @@ const startPolling = () => {
           ...currentTask.value,
           time: new Date().toISOString()
         })
+        
+        // 限制历史记录最多 50 条
+        if (downloadHistory.value.length > 50) {
+          downloadHistory.value = downloadHistory.value.slice(0, 50)
+        }
+        
+        // 保存到 localStorage
+        try {
+          localStorage.setItem('downloadHistory', JSON.stringify(downloadHistory.value))
+        } catch (error) {
+          console.error('保存下载历史记录失败:', error)
+        }
         
         if (status.status === 'completed') {
           showToast('success', '模型下载完成')

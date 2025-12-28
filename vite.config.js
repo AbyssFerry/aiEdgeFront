@@ -14,11 +14,13 @@ export default defineConfig({
     proxy: {
       '/api/management': {
         target: 'http://localhost:23058',
+        // target: 'http://10.130.213.83:23058',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/management/, '')
       },
       '/api/inference': {
         target: 'http://localhost:23059',
+        // target: 'http://10.130.213.83:23059',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/inference/, '')
       }
